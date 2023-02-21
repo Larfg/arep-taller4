@@ -7,7 +7,7 @@ import edu.escuelaing.app.services.Service;
 /**
  * Estructura request HTTP en forma de clase
  * @author Luis Felipe Giraldo Rodriguez
- * @version 3.0
+ * @version 4.0
  */
 public class Response {
     String body;

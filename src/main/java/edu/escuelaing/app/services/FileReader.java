@@ -2,15 +2,16 @@ package edu.escuelaing.app.services;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.ArrayList;
 
 /**
  * Servicio de lectura de archivos del disco duro
  * 
  * @author Luis Felipe Giraldo Rodriguez
- * @version 3.0
+ * @version 4.0
  */
 public class FileReader implements Service {
-    //private static String HOME = System.getProperty("user.home");
+    // private static String HOME = System.getProperty("user.home");
     private static String HOME = ".";
     String type;
     String file;

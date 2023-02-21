@@ -3,7 +3,7 @@ package edu.escuelaing.app.services;
 /**
  * Servicio sencillo en donde podemos agregar texto a una cadena inicial
  * @author Luis Felipe Giraldo Rodriguez
- * @version 3.0
+ * @version 4.0
  */
 public class BlogService implements Service{
     private static BlogService instance = null;

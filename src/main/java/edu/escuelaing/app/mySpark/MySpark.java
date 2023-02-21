@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Clase que nos permite mapear solicitudes get y post con comportamientos definidos por una función lambda
  * @author Luis Felipe Giraldo Rodriguez
- * @version 3.0
+ * @version 4.0
  */
 public class MySpark {
     static Map<String, RequestResponse> gets = new HashMap<String, RequestResponse>();

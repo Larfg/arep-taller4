@@ -4,14 +4,13 @@ import java.net.*;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import edu.escuelaing.app.mySpark.Request;
-import edu.escuelaing.app.mySpark.Response;
-import edu.escuelaing.app.mySpark.CreatedResponse;
-import edu.escuelaing.app.mySpark.MySpark;
-import edu.escuelaing.app.services.FileReader;
+import edu.escuelaing.app.mySpringBoot.MicroSpringBoot;
+import edu.escuelaing.app.mySpringBoot.RequestMapping;
 import edu.escuelaing.app.services.NotFoundService;
 import edu.escuelaing.app.services.Service;
 
@@ -19,7 +18,7 @@ import edu.escuelaing.app.services.Service;
  * Servidor ws que nos permite enviar y recibir elementos por ws
  * 
  * @author Luis Felipe Giraldo Rodriguez
- * @version 3.0
+ * @version 4.0
  */
 public final class HttpServer {
     private static HttpServer instance;
@@ -37,28 +36,31 @@ public final class HttpServer {
     }
 
     /**
-     * Metodo principal que nos inicia un servidor socket http, que procesa solicitudes post y get
-     * 
-     * @param args
-     * @param services mapa de servicios que vamos a utilizar
+     * Metodo principal que nos inicia un servidor socket http, que carga pojos con @component
+     * y mapea los metodos requestMapping para retornar solicitudes get
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    public void run(String[] args, Map<String, Service> services) throws IOException, ClassNotFoundException {
+    public void run() throws IOException, ClassNotFoundException {
         Map<String, Method> methods = new HashMap<>();
-        /**
+        MicroSpringBoot msb = new MicroSpringBoot();
+        ArrayList<String> componentNames = msb.getComponents(new ArrayList<>(), ".");
+        for (String componentName : componentNames) {
+            /**
              * Cargar la clase con forname
              * Extraigo los metodos request mapping
              */
-        Class c = Class.forName(args[0]);
-        for (Method method :c.getMethods()){
-            if(method.isAnnotationPresent(RequestMapping.class)){
-               /** Extraigo el valor del path
-             * extraigo una instancia del metodo
-             * poner el metodo con llave path
-             */
-                String path = method.getAnnotationsByType(RequestMapping.class)[0].value();
-                methods.put(path, method);
+            Class c = Class.forName(componentName);
+            for (Method method : c.getMethods()) {
+                if (method.isAnnotationPresent(RequestMapping.class)) {
+                    /**
+                     * Extraigo el valor del path
+                     * extraigo una instancia del metodo
+                     * poner el metodo con llave path
+                     */
+                    String path = method.getAnnotationsByType(RequestMapping.class)[0].value();
+                    methods.put(path, method);
+                }
             }
         }
         System.out.println("Servidor funcionando ...");
@@ -72,8 +74,7 @@ public final class HttpServer {
         }
         boolean running = true;
         while (running) {
-            
-            
+
             Socket clientSocket = null;
             try {
                 clientSocket = serverSocket.accept();
@@ -88,7 +89,7 @@ public final class HttpServer {
                             clientSocket.getInputStream()));
             String inputLine, outputLine;
 
-            //Proceso de lectura de los datos header y body de una solicitud
+            // Proceso de lectura de los datos header y body de una solicitud
             String headerLine = "";
             while ((inputLine = in.readLine()) != null) {
                 if (inputLine.length() == 0) {
@@ -101,11 +102,17 @@ public final class HttpServer {
                 body.append((char) in.read());
             }
 
-            //Proceso de procesamiento de las solicitudes post y get
+            // Proceso de procesamiento de las solicitudes get a los pojo component
             Request request = new Request(headerLine, body.toString());
             Service service = new NotFoundService();
             try {
-                service = (Service) methods.get(request.getUri()).invoke(null);
+                if (request.getUri().contains("file")){
+                    service = (Service) methods.get("/file/").invoke(null, request.getUri()); 
+                }
+                else if (methods.containsKey(request.getUri())) {
+                    service = (Service) methods.get(request.getUri()).invoke(null);
+                }
+
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 e.printStackTrace();
             }

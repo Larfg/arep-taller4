@@ -5,7 +5,7 @@ import java.util.HashMap;
 /**
  * Clase que implementa response para tener una respuesta facil de obtener de un get satisfactorio
  * @author Luis Felipe Giraldo Rodriguez
- * @version 3.0
+ * @version 4.0
  */
 public class CreatedResponse extends Response{
 
